@@ -17,4 +17,9 @@ export class FilmsController {
   ): Promise<ScheduleListResponseDto> {
     return this.filmsService.findSchedule(id);
   }
+
+  @Get(':id/shedule')
+  async findShedule(@Param('id') id: string): Promise<ScheduleListResponseDto> {
+    return this.filmsService.findSchedule(id);
+  }
 }
