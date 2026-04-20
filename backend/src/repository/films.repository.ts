@@ -1,38 +1,38 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { Film, FilmDocument } from '../films/schemas/film.schema';
-import { FilmDto } from '../films/dto/films.dto';
-import { ScheduleDto } from '../films/dto/films.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Film } from '../films/entities/film.entity';
+import { Schedule } from '../films/entities/schedule.entity';
+import { FilmDto, ScheduleDto } from '../films/dto/films.dto';
 
 @Injectable()
 export class FilmsRepository {
-  constructor(@InjectModel(Film.name) private filmModel: Model<FilmDocument>) {}
+  constructor(
+    @InjectRepository(Film) private filmRepository: Repository<Film>,
+    @InjectRepository(Schedule)
+    private scheduleRepository: Repository<Schedule>,
+  ) {}
 
   async findAll(): Promise<FilmDto[]> {
-    const films = await this.filmModel.find().exec();
-    return films.map((film) => {
-      const obj = film.toJSON();
-      return {
-        id: obj.id,
-        rating: obj.rating,
-        director: obj.director,
-        tags: obj.tags,
-        title: obj.title,
-        about: obj.about,
-        description: obj.description,
-        image: obj.image,
-        cover: obj.cover,
-      };
-    });
+    const films = await this.filmRepository.find();
+    return films.map((film) => ({
+      id: film.id,
+      rating: film.rating,
+      director: film.director,
+      tags: film.tags,
+      title: film.title,
+      about: film.about,
+      description: film.description,
+      image: film.image,
+      cover: film.cover,
+    }));
   }
 
   async findScheduleByFilmId(filmId: string): Promise<ScheduleDto[]> {
-    const film = await this.filmModel.findOne({ id: filmId }).exec();
-    if (!film) {
-      return [];
-    }
-    return film.schedule.map((s) => ({
+    const schedules = await this.scheduleRepository.find({
+      where: { film: { id: filmId } },
+    });
+    return schedules.map((s) => ({
       id: s.id,
       daytime: s.daytime,
       hall: s.hall,
@@ -48,25 +48,21 @@ export class FilmsRepository {
     sessionId: string,
     seats: string[],
   ): Promise<boolean> {
-    const film = await this.filmModel.findOne({ id: filmId }).exec();
-    if (!film) {
-      return false;
-    }
-
-    const session = film.schedule.find((s) => s.id === sessionId);
-    if (!session) {
+    const schedule = await this.scheduleRepository.findOne({
+      where: { id: sessionId, film: { id: filmId } },
+    });
+    if (!schedule) {
       return false;
     }
 
     for (const seat of seats) {
-      if (session.taken.includes(seat)) {
+      if (schedule.taken.includes(seat)) {
         return false;
       }
     }
 
-    session.taken.push(...seats);
-
-    await film.save();
+    schedule.taken = [...schedule.taken, ...seats];
+    await this.scheduleRepository.save(schedule);
     return true;
   }
 
@@ -74,14 +70,12 @@ export class FilmsRepository {
     filmId: string,
     sessionId: string,
   ): Promise<{ daytime: string; price: number } | null> {
-    const film = await this.filmModel.findOne({ id: filmId }).exec();
-    if (!film) {
+    const schedule = await this.scheduleRepository.findOne({
+      where: { id: sessionId, film: { id: filmId } },
+    });
+    if (!schedule) {
       return null;
     }
-    const session = film.schedule.find((s) => s.id === sessionId);
-    if (!session) {
-      return null;
-    }
-    return { daytime: session.daytime, price: session.price };
+    return { daytime: schedule.daytime, price: schedule.price };
   }
 }
