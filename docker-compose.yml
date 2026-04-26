@@ -1,0 +1,60 @@
+services:
+  frontend:
+    build:
+      context: ./frontend
+    image: ghcr.io/khodarevskii/frontend_avtovoz/frontend:latest
+    volumes:
+      - frontend-dist:/usr/share/nginx/html
+    restart: on-failure
+
+  backend:
+    build:
+      context: ./backend
+    image: ghcr.io/khodarevskii/frontend_avtovoz/backend:latest
+    env_file: .env
+    depends_on:
+      - db
+    restart: unless-stopped
+
+  nginx:
+    build:
+      context: ./nginx
+    image: ghcr.io/khodarevskii/frontend_avtovoz/nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - frontend-dist:/usr/share/nginx/html:ro
+    depends_on:
+      frontend:
+        condition: service_completed_successfully
+      backend:
+        condition: service_started
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    env_file: .env
+    environment:
+      POSTGRES_DB: ${DATABASE_NAME}
+      POSTGRES_USER: ${DATABASE_USERNAME}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    ports:
+      - "8080:80"
+    env_file: .env
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    restart: unless-stopped
+
+volumes:
+  frontend-dist:
+  db-data:
+  pgadmin-data:
