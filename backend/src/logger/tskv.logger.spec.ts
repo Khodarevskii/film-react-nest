@@ -36,9 +36,9 @@ describe('TskvLogger', () => {
       expect(result).not.toContain('context=');
     });
 
-    it('should convert message to string', () => {
-      const result = logger.formatMessage('log', 42);
-      expect(result).toContain('message=42');
+    it('should serialize object message to JSON string', () => {
+      const result = logger.formatMessage('log', { code: 42 });
+      expect(result).toContain('message={"code":42}');
     });
   });
 

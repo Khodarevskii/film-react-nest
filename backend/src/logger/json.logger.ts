@@ -2,27 +2,27 @@ import { LoggerService, Injectable } from '@nestjs/common';
 
 @Injectable()
 export class JsonLogger implements LoggerService {
-  formatMessage(level: string, message: any, ...optionalParams: any[]): string {
+  formatMessage(level: string, message: string | object, ...optionalParams: string[]): string {
     return JSON.stringify({ level, message, optionalParams });
   }
 
-  log(message: any, ...optionalParams: any[]) {
+  log(message: string | object, ...optionalParams: string[]) {
     console.log(this.formatMessage('log', message, ...optionalParams));
   }
 
-  error(message: any, ...optionalParams: any[]) {
+  error(message: string | object, ...optionalParams: string[]) {
     console.error(this.formatMessage('error', message, ...optionalParams));
   }
 
-  warn(message: any, ...optionalParams: any[]) {
+  warn(message: string | object, ...optionalParams: string[]) {
     console.warn(this.formatMessage('warn', message, ...optionalParams));
   }
 
-  debug(message: any, ...optionalParams: any[]) {
+  debug(message: string | object, ...optionalParams: string[]) {
     console.debug(this.formatMessage('debug', message, ...optionalParams));
   }
 
-  verbose(message: any, ...optionalParams: any[]) {
+  verbose(message: string | object, ...optionalParams: string[]) {
     console.log(this.formatMessage('verbose', message, ...optionalParams));
   }
 }
