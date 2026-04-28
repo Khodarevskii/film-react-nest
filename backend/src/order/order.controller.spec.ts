@@ -80,10 +80,7 @@ describe('OrderController', () => {
     it('should return correct total count matching number of tickets', async () => {
       const multiTicketOrder: CreateOrderDto = {
         ...mockOrderDto,
-        tickets: [
-          mockTicket,
-          { ...mockTicket, seat: 6 },
-        ],
+        tickets: [mockTicket, { ...mockTicket, seat: 6 }],
       };
       const expected = {
         total: 2,

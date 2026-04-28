@@ -21,7 +21,11 @@ describe('JsonLogger', () => {
     });
 
     it('should include optionalParams when provided', () => {
-      const result = logger.formatMessage('error', 'error message', 'MyContext');
+      const result = logger.formatMessage(
+        'error',
+        'error message',
+        'MyContext',
+      );
       const parsed = JSON.parse(result);
       expect(parsed.optionalParams).toBeDefined();
       expect(parsed.optionalParams).toContain('MyContext');

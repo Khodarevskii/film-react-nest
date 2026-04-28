@@ -1,36 +1,79 @@
 # FILM!
 
-## Установка
+Сервис афиши кинотеатра: просмотр расписания сеансов, выбор мест и бронирование билетов.
 
-### MongoDB
+## Ссылки
 
-Установите MongoDB скачав дистрибутив с официального сайта или с помощью пакетного менеджера вашей ОС. Также можно воспользоваться Docker (см. ветку `feat/docker`.
+- **Фронтенд:** http://newdom.nomorepartiessite.ru
+- **Бэкенд (API):** http://newdom.nomorepartiessite.ru/api/afisha
 
-Выполните скрипт `test/mongodb_initial_stub.js` в консоли `mongo`.
+## Стек
+
+- **Frontend:** React 18, TypeScript, Vite, SCSS
+- **Backend:** NestJS, TypeScript, TypeORM
+- **Database:** PostgreSQL 16
+- **Proxy:** nginx
+- **Deploy:** Docker, GitHub Actions
+
+## Запуск через Docker Compose
+
+1. Скопируйте `.env.example` в `.env` и заполните значения:
+
+```bash
+cp .env.example .env
+```
+
+2. Запустите все сервисы:
+
+```bash
+docker compose up -d --build
+```
+
+После старта доступны:
+- Приложение: http://localhost
+- pgAdmin: http://localhost:8080
+
+3. Заполните базу данных через pgAdmin, выполнив SQL-скрипты из `backend/test/`:
+   - `prac.init.sql` — создание таблиц
+   - `prac.films.sql` — данные о фильмах
+   - `prac.shedules.sql` — расписание сеансов
+
+## Локальная разработка
 
 ### Бэкенд
 
-Перейдите в папку с исходным кодом бэкенда
+```bash
+cd backend
+cp .env.example .env   # указать данные локальной БД
+npm ci
+npm run start:dev
+```
 
-`cd backend`
+### Фронтенд
 
-Установите зависимости (точно такие же, как в package-lock.json) помощью команд
+```bash
+cd frontend
+npm ci
+npm run dev
+```
 
-`npm ci` или `yarn install --frozen-lockfile`
+## Тесты
 
-Создайте `.env` файл из примера `.env.example`, в нём укажите:
+```bash
+cd backend
+npm test
+```
 
-* `DATABASE_DRIVER` - тип драйвера СУБД - в нашем случае это `mongodb` 
-* `DATABASE_URL` - адрес СУБД MongoDB, например `mongodb://127.0.0.1:27017/practicum`.  
+## Переменные окружения
 
-MongoDB должна быть установлена и запущена.
+Все переменные описаны в `.env.example`. Ключевые параметры:
 
-Запустите бэкенд:
-
-`npm start:debug`
-
-Для проверки отправьте тестовый запрос с помощью Postman или `curl`.
-
-
-
-
+| Переменная | Описание | Пример |
+|---|---|---|
+| `DATABASE_HOST` | Хост PostgreSQL | `db` (в Docker) |
+| `DATABASE_NAME` | Имя базы данных | `prac` |
+| `DATABASE_USERNAME` | Пользователь БД | `practicum` |
+| `DATABASE_PASSWORD` | Пароль БД | — |
+| `LOGGER` | Формат логов | `dev` / `json` / `tskv` |
+| `PGADMIN_DEFAULT_EMAIL` | Email для pgAdmin | `admin@admin.com` |
+| `PGADMIN_DEFAULT_PASSWORD` | Пароль pgAdmin | — |

@@ -2,7 +2,11 @@ import { LoggerService, Injectable } from '@nestjs/common';
 
 @Injectable()
 export class TskvLogger implements LoggerService {
-  formatMessage(level: string, message: string | object, ...optionalParams: string[]): string {
+  formatMessage(
+    level: string,
+    message: string | object,
+    ...optionalParams: string[]
+  ): string {
     const fields: Record<string, string> = {
       level,
       message: typeof message === 'object' ? JSON.stringify(message) : message,
